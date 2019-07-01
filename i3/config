@@ -84,35 +84,15 @@ bindsym $mod+minus scratchpad show
 bindsym $mod+Ctrl+Right workspace next
 bindsym $mod+Ctrl+Left workspace prev
 
-# Define names for default workspaces for which we configure key bindings later on.
-# We use variables to avoid repeating the names in multiple places.
-
-set $ws1 "1: "
-set $ws2 "2: "
-set $ws3 "3: "
-set $ws4 "4"
-set $ws5 "5"
-set $ws6 "6"
-set $ws7 "7"
-set $ws8 "8"
-
-# Forces application workspace launch
-for_window [class="Google-chrome"] move workspace $ws2
-for_window [class="Terminator"] move workspace $ws1
-for_window [class="TelegramDesktop"] move workspace $ws3
-for_window [class="whats-app-nativefier-7bbd2c"] move workspace $ws3
-for_window [class="Spotify"] move workspace $ws3
-
-# Start apps on startup
-exec --no-startup-id google-chrome-stable
-exec --no-startup-id i3-sensible-terminal
-exec --no-startup-id telegram-desktop
-exec --no-startup-id whatsapp-web-desktop
-exec --no-startup-id spotify
-
-# Fix Monitor Display
-exec_always xrandr --output eDP1 --mode 1366x768 --pos 0x0 --rotate normal --output HDMI-1 --off --output DP1 --mode 1920x1080 --pos 1024x0 --rotate normal
-exec_always xrandr --output eDP1 --left-of DP1
+# workspaces
+set $ws1 1
+set $ws2 2
+set $ws3 3
+set $ws4 4
+set $ws5 5
+set $ws6 6
+set $ws7 7
+set $ws8 8
 
 # switch to workspace
 bindsym $mod+1 workspace $ws1
@@ -123,11 +103,6 @@ bindsym $mod+5 workspace $ws5
 bindsym $mod+6 workspace $ws6
 bindsym $mod+7 workspace $ws7
 bindsym $mod+8 workspace $ws8
-
-
-# Lock screen
-bindsym $MOD+SHIFT+x exec i3lock-fancy-dualmonitor
-
 
 # Move focused container to workspace
 bindsym $mod+Ctrl+1 move container to workspace $ws1
@@ -148,6 +123,51 @@ bindsym $mod+Shift+5 move container to workspace $ws5; workspace $ws5
 bindsym $mod+Shift+6 move container to workspace $ws6; workspace $ws6
 bindsym $mod+Shift+7 move container to workspace $ws7; workspace $ws7
 bindsym $mod+Shift+8 move container to workspace $ws8; workspace $ws8
+
+# Fix Monitor Display
+exec_always xrandr --auto --output DP1 --mode 1920x1080 --right-of eDP1
+
+
+# Lock screen
+bindsym $MOD+SHIFT+x exec i3lock-fancy-dualmonitor
+
+# Fix touchpad
+exec --no-startup-id synclient Tapbutton1=1
+
+# Lock screen and suspend
+exec  --no-startup-id xautolock -time 5 -locker i3lock-fancy-dualmonitor -detectsleep &
+exec  --no-startup-id xss-lock i3lock-fancy-dualmonitor &
+
+# Audio/Volume controls
+
+# increase sound volume
+#bindsym XF86AudioRaiseVolume exec amixer -D pulse sset Master 10%+
+# decrease sound volume
+#bindsym XF86AudioLowerVolume exec amixer -D pulse sset Master 10%-
+
+# Pulse Audio controls
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume 0 +5% #increase sound volume
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume 0 -5% #decrease sound volume
+#bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle # mute sound
+
+
+# Media player controls
+bindsym XF86AudioPlay exec playerctl play-pause
+#bindsym XF86AudioPause exec playerctl pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+
+# toggle mute
+bindsym XF86AudioMute exec amixer -D pulse set Master 1+ toggle
+
+bindsym XF86MonBrightnessUp exec light -A 5 # increase screen brightness
+bindsym XF86MonBrightnessDown exec light -U 5 # decrease screen brightness
+
+
+# Sreen brightness controls
+#bindsym XF86MonBrightnessUp exec xbacklight -inc 5 # increase screen brightness
+#bindsym XF86MonBrightnessDown exec xbacklight -dec 5 # decrease screen brightness:
+
 
 # Open specific applications in floating mode
 for_window [title="alsamixer"] floating enable border pixel 1
@@ -189,6 +209,9 @@ bindsym $mod+Shift+r restart
 
 # exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
+
+# no mouse focus
+focus_follows_mouse no
 
 # Set shut down, restart and locking features
 bindsym $mod+0 mode "$mode_system"
@@ -232,43 +255,25 @@ mode "resize" {
 }
 
 # Autostart applications
-exec --no-startup-id nitrogen --restore; sleep 1; compton -b
+exec --no-startup-id nitrogen --restore; sleep 1 
 exec --no-startup-id nm-applet
 exec --no-startup-id xfce4-power-manager
 exec --no-startup-id pamac-tray
 exec --no-startup-id clipit
+exec --no-startup-id unclutter &
+exec export LC_ALL=en_US.UTF-8
+exec_always setxkbmap -model abnt2 -layout br -variant abnt2
 exec_always --no-startup-id ff-theme-util
 exec_always --no-startup-id fix_xcursor
 exec_always --no-startup-id /$HOME/.config/polybar/i3wmthemer_bar_launch.sh
-exec_always --no-startup-id compton
-
-# Fix touchpad
-
-exec --no-startup-id synclient Tapbutton1=1
-
-
-# Lock screen and suspend
-exec  --no-startup-id xautolock -time 5 -locker i3lock-fancy-dualmonitor &
-exec  --no-startup-id xss-lock i3lock-fancy-dualmonitor &
-
-# Audio/Volume controls
-# increase sound volume
-bindsym XF86AudioRaiseVolume exec amixer -D pulse sset Master 10%+
-
-# decrease sound volume
-bindsym XF86AudioLowerVolume exec amixer -D pulse sset Master 10%-
-
-# toggle mute
-bindsym XF86AudioMute exec amixer -D pulse set Master 1+ toggle
+exec_always --no-startup-id xcompmgr -c -f -n
 
 # Theme colors
-# client.focused #707880 #1d1f21 #707880 #8c9440 #8c9440
-
-client.focused #707880 #1d1f21 #707880 #5f819d #5f819d
-client.focused_inactive #707880 #1d1f21 #707880 #5f819d #5f819d
-client.unfocused #707880 #1d1f21 #707880 #5f819d #5f819d
-client.urgent #707880 #1d1f21 #707880 #5f819d #5f819d
-client.placeholder #707880 #1d1f21 #707880 #5f819d #5f819d
+#client.focused #707880 #1d1f21 #707880 #8c9440 #8c9440
+#client.focused_inactive #707880 #1d1f21 #707880 #5f819d #5f819d
+#client.unfocused #707880 #1d1f21 #707880 #5f819d #5f819d
+#client.urgent #707880 #1d1f21 #707880 #5f819d #5f819d
+#client.placeholder #707880 #1d1f21 #707880 #5f819d #5f819d
 
 client.background #1d1f21
 
